@@ -11,17 +11,14 @@ public class HelloMicroservice extends AbstractVerticle {
     public void start() {
         vertx
                 .eventBus()
-                .<String>consumer("hello", event -> {
-                    JsonObject json = new JsonObject()
-                            .put("served-by", this.toString());
-
-                    final String message = Optional.of(event)
-                            .filter(e -> e.body().isEmpty())
-                            .map(e -> "Hello " + e.body())
-                            .orElse("Hello World!");
-
-                    json.put("message", message);
-                });
+                .<String>consumer("hello", event -> event.reply(
+                        new JsonObject()
+                                .put("served-by", this.toString())
+                                .put("message",
+                                        Optional.of(event.body())
+                                                .filter(e -> !e.isEmpty())
+                                                .map(e -> "Hello " + e)
+                                                .orElse("Hello World!"))));
     }
 
 }
